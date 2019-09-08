@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ksd.smbms.mapper.GoodsMapper">
+	<!-- 设置映射关系 -->
+	<resultMap type="Goods" id="GoodsMap">
+		<result column="id" property="id" />
+		<result column="goodsCode" property="goodscode" />
+		<result column="goodsName" property="goodsname" />
+		<result column="goodsPicture" property="goodspicture" />
+		<result column="goodsPrice" property="goodsprice" />
+		<result column="goodsCount" property="goodscount" />
+		<result column="creationDate" property="creationdate" />
+	</resultMap>
+	<!-- 查询全部并分页加模糊查询 -->
+	<select id="queryGoods" resultMap="GoodsMap">
+		select * from smbms_goods where 1=1
+		<if test="goodsCode != null and goodsCode!= ''">
+			and goodsCode like CONCAT ('%',#{goodsCode},'%')
+		</if>
+		<if test="goodsName != null and goodsName != ''">
+			and goodsName like CONCAT ('%',#{goodsName},'%')
+		</if>
+		limit #{start},#{size}
+	</select>
+
+	<!-- 获取用户总条数及模糊查询 -->
+	<select id="getGoodsCount" resultType="int">
+		select count(1) from smbms_goods
+		where 1=1
+		<if test="goodsCode != null and goodsCode!= ''">
+			and goodsCode like CONCAT ('%',#{goodsCode},'%')
+		</if>
+		<if test="goodsName != null and goodsName != ''">
+			and goodsName like CONCAT ('%',#{goodsName},'%')
+		</if>
+	</select>
+
+	<!-- 添加商品 -->
+	<insert id="add" parameterType="Goods">
+		insert into smbms_goods (
+		goodsCode,goodsName,
+		goodsPrice, goodsCount,
+		creationDate,goodsPicture
+		)
+		values
+		(#{goodscode},#{goodsname},
+		#{goodsprice},#{goodscount},
+		#{creationdate},#{goodspicture}
+		)
+	</insert>
+
+	<!-- 通过id查看商品 -->
+	<select id="findById" parameterType="int" resultType="Goods">
+		select *
+		from smbms_goods
+		where id=#{0};
+	</select>
+
+	<!-- 修改商品信息 -->
+	<update id="updategoods" parameterType="Goods">
+		update smbms_goods
+		<set>
+			<if test="goodscode != null">
+				goodsCode = #{goodscode},
+			</if>
+			<if test="goodsname != null">
+				goodsName = #{goodsname},
+			</if>
+			<if test="goodsprice != null">
+				goodsPrice = #{goodsprice},
+			</if>
+			<if test="goodscount != null">
+				goodsCount = #{goodscount},
+			</if>
+			<if test="goodspicture != null">
+				goodsPicture = #{goodspicture},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+	<select id="findBillname" resultType="string" parameterType="string">
+		SELECT DISTINCT g.goodsName FROM smbms_goods g,smbms_bill b
+		WHERE
+		b.`productName`=g.goodsName
+		AND b.productName=#{0};
+	</select>
+	<select id="findGoodsid" resultType="int" parameterType="string">
+		SELECT DISTINCT g.id FROM smbms_goods g,smbms_bill b
+		WHERE b.`productName`=g.goodsName
+		AND b.productName=#{0}
+	</select>
+	<select id="findGoodscount" resultType="int" parameterType="string">
+	    SELECT DISTINCT g.goodsCount FROM smbms_goods g,smbms_bill b
+		WHERE b.`productName`=g.goodsName
+		AND b.productName=#{0}
+	</select>
+	
+	<select id="goodslist" resultMap="GoodsMap">
+	    select id,goodsName from smbms_goods
+	</select>
+	
+	<select id="checkCount" resultType="int" parameterType="int">
+	    select goodsCount from smbms_goods where id=#{0}
+	</select>
+	
+	<update id="updateCount" parameterType="Goods">
+	    update smbms_goods set goodsCount=#{goodscount} where id=#{id}
+	</update>
+	
+	<select id="findCountByid" resultType="int" parameterType="int">
+	    select goodsCount from smbms_goods where id=#{0}
+	</select>
+	
+	<delete id="delet" parameterType="int">
+	    delete from smbms_goods where id=#{0}
+	</delete>
+</mapper>

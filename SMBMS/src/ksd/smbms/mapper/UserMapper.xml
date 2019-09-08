@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ksd.smbms.mapper.UserMapper">
+	<!-- 设置映射关系 -->
+	<resultMap type="User" id="UserMap">
+		<result column="id" property="id" />
+		<result column="userCode" property="usercode" />
+		<result column="userName" property="username" />
+		<result column="userPassword" property="userpassword" />
+		<result column="gender" property="gender" />
+		<result column="birthday" property="birthday" />
+		<result column="phone" property="phone" />
+		<result column="address" property="address" />
+		<result column="userRole" property="userrole" />
+		<result column="createdBy" property="createdby" />
+		<result column="creationDate" property="creationdate" />
+		<result column="modifyBy" property="modifyby" />
+		<result column="modifyDate" property="modifydate" />
+	</resultMap>
+	<!--登陆 -->
+	<select id="login" resultType="User">
+		select * from smbms_user where
+		userCode=#{0} and userPassword=#{1};
+	</select>
+	
+	<!-- 查询全部并分页加模糊查询 -->
+	<select id="queryUsers" resultMap="UserMap">
+		select u.*,r.roleName from smbms_user u,smbms_role r where u.userRole
+		= r.id
+
+		<if test="userName != null and userName != ''">
+			and u.userName like CONCAT ('%',#{userName},'%')
+		</if>
+
+		<if test="userRole != null and userRole!=0">
+			and u.userRole = #{userRole}
+		</if>
+		limit #{start},#{size}
+	</select>
+	
+	<!-- 获取用户总条数及模糊查询 -->
+	<select id="getUserCount" resultType="Int">
+		select count(1) as count from smbms_user u,smbms_role r
+		where
+		u.userRole = r.id
+		<if test="userName != null and userName != ''">
+			and u.userName like CONCAT ('%',#{userName},'%')
+		</if>
+		<if test="userRole != null and userRole!=0">
+			and u.userRole = #{userRole}
+		</if>
+	</select>
+	
+	<!-- 添加用户数据 -->
+	<insert id="add" parameterType="User">
+		insert into smbms_user (
+		userCode,userName,
+		userPassword, gender, birthday,
+		phone, address,
+		userRole,createdBy,creationDate
+		)
+		values (#{usercode}, #{username}, #{userpassword},
+		#{gender},
+		#{birthday}, #{phone}, #{address}, #{userrole},
+		#{createdby}, #{creationdate}
+		)
+	</insert>
+	
+	<!-- 验证用户名唯一性  -->
+	<select id="checkName" parameterType="string" resultMap="UserMap">
+		select *
+		from smbms_user where userCode=#{0}
+	</select>
+	
+	<!-- 删除用户信息 -->
+	<delete id="delet" parameterType="int">
+		delete from smbms_user where
+		id=#{delid};
+	</delete>
+	
+	<!-- 通过id查询用户信息 -->
+	<select id="findById" resultMap="UserMap" parameterType="int">
+		select
+		u.*,r.roleName from smbms_user u,smbms_role r
+		where u.id=#{uid} and
+		u.userRole=r.id
+	</select>
+	
+	<!-- 修改用户信息 -->
+	<update id="update" parameterType="User">
+		update smbms_user
+		<set>
+			<if test="username != null">
+				userName = #{username},
+			</if>
+			<if test="gender != null">
+				gender = #{gender},
+			</if>
+			<if test="birthday != null">
+				birthday = #{birthday},
+			</if>
+			<if test="phone != null">
+				phone = #{phone},
+			</if>
+			<if test="address != null">
+				address = #{address},
+			</if>
+			<if test="userrole != null">
+				userRole = #{userrole},
+			</if>
+			<if test="modifyby != null">
+				modifyBy = #{modifyby},
+			</if>
+			<if test="modifydate != null">
+				modifyDate = #{modifydate},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<!-- 通过用户名查询当前用户的密码 -->
+	<select id="findOldpwd" parameterType="string" resultType="String">
+		select userPassword from smbms_user where userName=#{0};
+	</select>
+	<update id="pwdupdate" parameterType="string">
+		update smbms_user set userPassword=#{userpassword} where userName=#{username}
+	</update>
+	
+	<!-- 通过用户名查询当前用户id -->
+	<select id="finduserid" resultType="int" parameterType="string">
+	    select id from smbms_user where userName=#{0}
+	</select>
+
+</mapper>

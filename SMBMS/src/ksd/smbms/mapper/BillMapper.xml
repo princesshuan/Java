@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ksd.smbms.mapper.BillMapper">
+	<!-- 设置映射关系 -->
+	<resultMap type="Bill" id="BillMap">
+		<result column="id" property="id" />
+		<result column="billCode" property="billcode" />
+		<result column="productName" property="productname" />
+		<result column="productDesc" property="productdesc" />
+		<result column="productUnit" property="productunit" />
+		<result column="productCount" property="productcount" />
+		<result column="totalPrice" property="totalprice" />
+		<result column="isPayment" property="ispayment" />
+		<result column="createdBy" property="createdby" />
+		<result column="creationDate" property="creationdate" />
+		<result column="modifyBy" property="modifyby" />
+		<result column="modifyDate" property="modifydate" />
+		<result column="providerId" property="providerid" />
+		<result column="proName" property="providername" />
+		<result column="isDelet" property="isdelet" />
+	</resultMap>
+	<!-- 查询全部并分页加模糊查询 -->
+	<select id="queryBills" resultMap="BillMap">
+		select b.*,p.proName from smbms_bill b,smbms_provider p
+		where
+		b.providerId = p.id and b.isDelet=1
+		<if test="productName != null and productName != ''">
+			and b.productName like CONCAT ('%',#{productName},'%')
+		</if>
+		<if
+			test="startDate !=null and startDate !=''and endDate !=null and endDate !=''">
+			and b.creationDate between #{startDate} and #{endDate}
+		</if>
+		<if test="providerId != null and providerId !=0">
+			and b.providerId = #{providerId}
+		</if>
+		<if test="isPayment != null and isPayment !=0">
+			and b.isPayment = #{isPayment}
+		</if>
+		limit #{start},#{size}
+	</select>
+	
+	<!-- 查询订单总条数及模糊查询 -->
+	<select id="getBillCount" resultType="int">
+		select count(1) as count from smbms_bill b,smbms_provider p
+		where
+		b.providerId = p.id and b.isDelet=1
+		<if test="productName != null and productName != ''">
+			and b.productName like CONCAT ('%',#{productName},'%')
+		</if>
+		<if
+			test="startDate !=null and startDate !=''and endDate !=null and endDate !=''">
+			and b.creationdate between #{startDate} and #{endDate}
+		</if>
+		<if test="providerId != null and providerId !=0">
+			and b.providerId = #{providerId}
+		</if>
+		<if test="isPayment != null and isPayment !=0">
+			and b.isPayment = #{isPayment}
+		</if>
+	</select>
+
+    <!-- 添加订单 -->
+	<insert id="add" parameterType="Bill">
+		insert into smbms_bill (
+		billCode,productName,
+		productUnit, productDesc,productCount,
+		totalPrice,providerId,
+		isPayment,createdBy,
+		creationDate,isDelet
+		)
+		values
+		(#{billcode},#{productname},
+		#{productunit}, #{productdesc},
+		#{productcount},#{totalprice},
+		#{providerid},#{ispayment},
+		#{createdby}, #{creationdate}, #{isdelet}
+		)
+	</insert>
+	
+	<!-- 验证编码唯一性 -->
+	<select id="checkCode" resultType="Bill" parameterType="string">
+	   select * from smbms_bill where billCode=#{0}
+	</select>
+	
+	<!-- 通过id查询订单信息 -->
+	<select id="findById" resultMap="BillMap" parameterType="int">
+		select
+		b.*,p.proName from smbms_bill b,smbms_provider p
+		where b.providerId =
+		p.id and b.id=#{bid};
+	</select>
+	
+	<!-- 修改订单信息 -->
+	<update id="billupdate" parameterType="Bill">
+		update smbms_bill
+		<set>
+			<if test="billcode != null">
+				billCode = #{billcode},
+			</if>
+			<if test="productname != null">
+				productName = #{productname},
+			</if>
+			<if test="productunit != null">
+				productUnit = #{productunit},
+			</if>
+			<if test="productdesc != null">
+				productDesc = #{productdesc},
+			</if>
+			<if test="productcount != null">
+				productCount = #{productcount},
+			</if>
+			<if test="totalprice != null">
+				totalPrice = #{totalprice},
+			</if>
+			<if test="providerid != null">
+				providerId = #{providerid},
+			</if>
+			<if test="ispayment != null and ispayment !=1">
+				isPayment = #{ispayment},
+			</if>
+			<if test="modifyby != null">
+				modifyBy = #{modifyby},
+			</if>
+			<if test="modifydate != null">
+				modifyDate = #{modifydate},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<!-- 查询该订单是否付款 -->
+	<select id="findpay" parameterType="int" resultType="int">
+		select isPayment from smbms_bill where id=#{0};
+	</select>
+	
+	<select id="findByProid" resultMap="BillMap" parameterType="int">
+		SELECT b.`productName`,b.`productCount`,b.`totalPrice`,b.`isPayment`,b.productUnit FROM
+		smbms_bill b,smbms_provider p
+		WHERE p.`id`=b.`providerId`
+		AND p.id=#{0}
+	</select>
+	
+	<!-- 逻辑删除 -->
+	<update id="delet" parameterType="int">
+	    update smbms_bill set isDelet=2 where id=#{0};
+	</update>
+</mapper>

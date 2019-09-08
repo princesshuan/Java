@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ksd.smbms.mapper.RoleMapper">
+	<resultMap id="RoleMap" type="Role">
+		<result column="id" property="id" />
+		<result column="roleCode" property="rolecode" />
+		<result column="roleName" property="rolename" />
+		<result column="createdBy" property="createdby" />
+		<result column="creationDate" property="creationdate" />
+		<result column="modifyBy" property="modifyby" />
+		<result column="modifyDate" property="modifydate" />
+	</resultMap>
+	
+	<!-- 查询角色表  -->
+	<select id="rolelist" resultMap="RoleMap">
+		SELECT id,roleName FROM smbms_role;
+	</select>
+</mapper>

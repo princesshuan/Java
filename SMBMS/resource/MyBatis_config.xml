@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 设置MyBatis的log实现为LOG4J -->
+	<settings>
+	      <setting name="logImpl" value="LOG4J"/>
+	</settings>
+	<!-- 配置别名 type:类全名 alias:别名 -->
+	<typeAliases>
+	     <package name="ksd.smbms.pojo"/>
+	</typeAliases>
+	
+</configuration>

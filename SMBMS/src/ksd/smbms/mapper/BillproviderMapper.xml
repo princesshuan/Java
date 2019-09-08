@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ksd.smbms.mapper.BillproviderMapper">
+	<resultMap id="BillproviderMap" type="Billprovider">
+		<result column="id" property="id" />
+		<result column="proCode" property="procode" />
+		<result column="proName" property="proname" />
+		<result column="proDesc" property="prodesc" />
+		<result column="proContact" property="procontact" />
+		<result column="proPhone" property="prophone" />
+		<result column="proAddress" property="proaddress" />
+		<result column="proFax" property="profax" />
+		<result column="createdBy" property="createdby" />
+		<result column="creationDate" property="creationdate" />
+		<result column="modifyDate" property="modifydate" />
+		<result column="modifyBy" property="modifyby" />
+		<result column="proLicence" property="prolicence" />
+		<result column="isDelet" property="isdelet" />
+	</resultMap>
+	<select id="providerlist" resultMap="BillproviderMap">
+		SELECT id,proName FROM
+		smbms_provider;
+	</select>
+
+	<!-- 查询全部并分页 加模糊查询-->
+	<select id="queryProviders" resultMap="BillproviderMap">
+		select * from smbms_provider where isDelet=1
+		<if test="proCode != null and proCode != ''">
+			and proCode like CONCAT ('%',#{proCode},'%')
+		</if>
+		<if test="proName != null and proName != ''">
+			and proName like CONCAT ('%',#{proName},'%')
+		</if>
+		limit #{start},#{size}
+	</select>
+	
+	<!-- 查询供应商总个数及模糊查询 -->
+	<select id="getProviderCount" resultType="int">
+		select count(1) as count from smbms_provider 
+		where isDelet=1
+		<if test="proCode != null and proCode != ''">
+			and proCode like CONCAT ('%',#{proCode},'%')
+		</if>
+		<if test="proName != null and proName != ''">
+			and proName like CONCAT ('%',#{proName},'%')
+		</if>
+	</select>
+
+    <!-- 添加供应商 -->
+	<insert id="add" parameterType="Billprovider">
+		insert into smbms_provider (
+		proCode,proName,
+		proContact, proPhone, proAddress,
+		proFax,isDelet,
+		proDesc,createdBy,creationDate,proLicence
+		)
+		values (#{procode},#{proname},
+		#{procontact},
+		#{prophone},
+		#{proaddress},#{profax},#{isdelet},
+		#{prodesc}, #{createdby}, #{creationdate},#{prolicence}
+		)
+	</insert>
+	
+	<!-- 通过id查询供应商信息 -->
+	<select id="findById" resultType="Billprovider" parameterType="int">
+		select * from smbms_provider where id=#{id}
+	</select>
+
+    <!-- 修改供应商信息 -->
+	<update id="updateprovider" parameterType="Billprovider">
+		update smbms_provider
+		<set>
+			<if test="procode != null">
+				proCode = #{procode},
+			</if>
+			<if test="proname != null">
+				proName = #{proname},
+			</if>
+			<if test="procontact != null">
+				proContact = #{procontact},
+			</if>
+			<if test="prophone != null">
+				proPhone = #{prophone},
+			</if>
+			<if test="proaddress != null">
+				proAddress = #{proaddress},
+			</if>
+			<if test="profax != null">
+				proFax = #{profax},
+			</if>
+			<if test="prodesc != null">
+				proDesc = #{prodesc},
+			</if>
+			<if test="modifydate != null">
+				modifyDate = #{modifydate},
+			</if>
+			<if test="modifyby != null">
+				modifyBy = #{modifyby},
+			</if>
+			<if test="prolicence != null">
+				proLicence = #{prolicence},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+
+    <!-- 查询该供应商下是否有订单 -->
+	<select id="findbill" parameterType="int" resultType="int">
+		SELECT COUNT(0) FROM smbms_provider p,smbms_bill b
+		WHERE p.`id`=b.`providerId` AND p.`id`=#{proid}
+	</select>
+	
+	<!-- 验证编码唯一性 -->
+	<select id="checkCode" resultType="Billprovider" parameterType="string">
+	     select * from smbms_provider 
+	     where proCode=#{0};
+	</select>
+	
+	<!-- 验证名字唯一性 -->
+	<select id="checkName" resultType="Billprovider" parameterType="string">
+	     select * from smbms_provider 
+	     where proName=#{0};
+	</select>
+	
+	<!-- 逻辑删除 -->
+	<update id="delet" parameterType="int">
+	     update smbms_provider set isDelet=2 where id=#{0};
+	</update>
+</mapper>
